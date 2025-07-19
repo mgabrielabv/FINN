@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 1200);
 
   // Mostrar solo login al inicio, sin clase extra
-  document.querySelector('nav').style.display = 'none';
+  document.querySelector('.topbar').style.display = 'none';
   document.getElementById('vista-principal').style.display = 'none';
   document.querySelector('.logo').style.display = '';
   document.querySelector('.btn-iniciar').style.display = 'block';
@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const guardadoUsuario = (localStorage.getItem('usuario') || '').trim();
       const guardadoContrasena = (localStorage.getItem('contrasena') || '').trim();
       if (usuario && contrasena && usuario === guardadoUsuario && contrasena === guardadoContrasena) {
-        document.querySelector('nav').style.display = '';
+        document.querySelector('.topbar').style.display = '';
         document.getElementById('vista-principal').style.display = '';
         loginForm.style.display = 'none';
         document.querySelector('.logo').style.display = 'none';

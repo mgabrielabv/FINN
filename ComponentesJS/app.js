@@ -24,18 +24,31 @@ async function navDelegationHandler(e) {
 
 
 
+
+
 async function mostrarVista(vista) {
-  const nav = document.querySelector('nav');
+  const nav = document.querySelector('.topbar nav');
   const main = document.getElementById('vista-principal');
-  if (nav) nav.style.display = '';
+  if (document.querySelector('.topbar')) document.querySelector('.topbar').style.display = '';
   if (main) main.style.display = '';
+  // Animación slide-in
+  if (main) {
+    main.classList.remove('slide-in');
+    // Forzar reflow para reiniciar animación
+    void main.offsetWidth;
+    main.classList.add('slide-in');
+    main.addEventListener('animationend', () => {
+      main.classList.remove('slide-in');
+    }, { once: true });
+  }
   await mostrarVistaNavbar(vista);
 }
 
 window.mostrarVista = mostrarVista;
 
+
 function asignarNavDelegation() {
-  const nav = document.querySelector('nav');
+  const nav = document.querySelector('.topbar nav');
   if (nav && !nav._delegationSet) {
     nav.addEventListener('click', navDelegationHandler);
     nav._delegationSet = true;
@@ -45,7 +58,7 @@ function asignarNavDelegation() {
 window.asignarNavDelegation = asignarNavDelegation;
 
 const observer = new MutationObserver(() => {
-  const nav = document.querySelector('nav');
+  const nav = document.querySelector('.topbar nav');
   if (nav && !nav._delegationSet) {
     asignarNavDelegation();
   }
