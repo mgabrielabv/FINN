@@ -1,4 +1,3 @@
-
 // filepath: /Users/luismi/Documents/Uru/6to_trimestre/LCW/FINN/ComponentesJS/app.js
 import { mostrarVista as mostrarVistaNavbar } from './navbar.js';
 import { cargarCategorias } from './categorias.js';

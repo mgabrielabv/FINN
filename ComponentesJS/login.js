@@ -38,6 +38,30 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Si ya está autenticado, muestra la app directamente
+  const guardadoUsuario = (localStorage.getItem('usuario') || '').trim();
+  const guardadoContrasena = (localStorage.getItem('contrasena') || '').trim();
+  if (guardadoUsuario && guardadoContrasena) {
+    document.querySelector('.topbar').style.display = '';
+    document.getElementById('vista-principal').style.display = '';
+    document.getElementById('loginForm').style.display = 'none';
+    document.querySelector('.logo').style.display = 'none';
+    document.querySelector('.btn-iniciar').style.display = 'none';
+    if (!window._appLoaded) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'ComponentesJS/app.js';
+      script.onload = () => {
+        if (window.asignarNavDelegation) window.asignarNavDelegation();
+      };
+      document.body.appendChild(script);
+      window._appLoaded = true;
+    } else {
+      if (window.asignarNavDelegation) window.asignarNavDelegation();
+    }
+    return;
+  }
+
   loginForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const usuario = this.querySelector('input[type="text"]').value.trim();

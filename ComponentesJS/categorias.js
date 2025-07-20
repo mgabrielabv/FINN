@@ -1,3 +1,20 @@
+import { abrirDB } from './indexedDB.js';
+
+export async function cargarCategoriasTransaccion() {
+  const db = await abrirDB();
+  const tx = db.transaction("categorias", "readonly");
+  const store = tx.objectStore("categorias");
+  const req = store.getAll();
+  req.onsuccess = function() {
+    const select = document.getElementById('categoria-transaccion');
+    if (!select) return;
+    select.innerHTML = '';
+    req.result.forEach(cat => {
+      select.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+    });
+  };
+}
+
 export async function cargarCategorias() {
   const db = await abrirDB();
   const tx = db.transaction("categorias", "readonly");
@@ -5,17 +22,17 @@ export async function cargarCategorias() {
   const req = store.getAll();
   req.onsuccess = function() {
     const lista = document.getElementById('lista-categorias');
+    if (!lista) return;
     lista.innerHTML = '';
     req.result.forEach(cat => {
       const div = document.createElement('div');
       div.className = 'categoria-card';
       div.innerHTML = `<span>${cat.nombre}</span>
-        <button>Eliminar</button>`; // Elimina el onclick del HTML
-
-      // Aquí seleccionas el botón y le agregas el listener
+        <button>Eliminar</button>`;
       const btnEliminar = div.querySelector('button');
-      btnEliminar.addEventListener('click', () => eliminarCategoria(cat.id));
-
+      btnEliminar.addEventListener('click', async () => {
+        await eliminarCategoria(cat.id);
+      });
       lista.appendChild(div);
     });
   };

@@ -1,5 +1,5 @@
 import { cargarCategorias } from './categorias.js';
-import { cargarCategoriasTransaccion, cargarTransacciones } from './transacciones.js';
+import { cargarCategoriasTransaccion, cargarCategoriasFiltro, cargarTransacciones, eliminarTransaccion, editarTransaccion } from './transacciones.js';
 import { abrirDB, generarId } from './indexedDB.js';
  
 export async function mostrarVista(vista) {
@@ -10,20 +10,36 @@ export async function mostrarVista(vista) {
         <input type="text" id="nombre-categoria" placeholder="Nombre categoría" required>
         <button type="submit">Agregar</button>
       </form>`;
-    cargarCategorias();
-    document.getElementById('form-categoria').onsubmit = async function(e) {
+    await cargarCategorias();
+    const formCat = document.getElementById('form-categoria');
+    formCat.onsubmit = async function(e) {
       e.preventDefault();
       const nombre = document.getElementById('nombre-categoria').value.trim();
       if (!nombre) return;
       const db = await abrirDB();
       const tx = db.transaction("categorias", "readwrite");
       tx.objectStore("categorias").add({ id: generarId(), nombre });
-      tx.oncomplete = cargarCategorias;
-      this.reset();
+      tx.oncomplete = async () => {
+        await cargarCategorias();
+        formCat.reset();
+      };
+      tx.onerror = () => alert("Error al guardar la categoría. Intenta de nuevo.");
     };
   } else if (vista === 'transacciones') {
-    main.innerHTML = '<h2>Transacciones</h2><div id="lista-transacciones"></div>' +
-      `<form id="form-transaccion">
+    main.innerHTML = `
+      <h2>Transacciones</h2>
+      <div>
+        <input type="text" id="buscar-transaccion" placeholder="Buscar descripción o categoría">
+        <select id="filtrar-tipo">
+          <option value="">Todos</option>
+          <option value="Ingreso">Ingreso</option>
+          <option value="Egreso">Egreso</option>
+        </select>
+        <select id="filtrar-categoria"></select>
+        <button id="btn-filtrar">Filtrar</button>
+      </div>
+      <div id="lista-transacciones"></div>
+      <form id="form-transaccion">
         <select id="tipo-transaccion">
           <option value="Ingreso">Ingreso</option>
           <option value="Egreso">Egreso</option>
@@ -33,10 +49,13 @@ export async function mostrarVista(vista) {
         <select id="categoria-transaccion"></select>
         <input type="text" id="desc-transaccion" placeholder="Descripción (opcional)">
         <button type="submit">Registrar</button>
-      </form>`;
+      </form>
+    `;
     await cargarCategoriasTransaccion();
+    await cargarCategoriasFiltro();
     cargarTransacciones();
-    document.getElementById('form-transaccion').onsubmit = async function(e) {
+    const formTx = document.getElementById('form-transaccion');
+    formTx.onsubmit = async function(e) {
       e.preventDefault();
       const tipo = document.getElementById('tipo-transaccion').value;
       const monto = Number(document.getElementById('monto-transaccion').value);
@@ -49,9 +68,16 @@ export async function mostrarVista(vista) {
       tx.objectStore("transacciones").add({
         id: generarId(), tipo, monto, fecha, categoriaId, descripcion
       });
-      tx.oncomplete = cargarTransacciones;
-      this.reset();
+      tx.oncomplete = async () => {
+        await cargarTransacciones();
+        formTx.reset();
+      };
+      tx.onerror = () => alert("Error al guardar la transacción. Intenta de nuevo.");
     };
+    document.getElementById('btn-filtrar').onclick = () => cargarTransacciones();
+    document.getElementById('buscar-transaccion').oninput = () => cargarTransacciones();
+    document.getElementById('filtrar-tipo').onchange = () => cargarTransacciones();
+    document.getElementById('filtrar-categoria').onchange = () => cargarTransacciones();
   } else {
     main.innerHTML = `<h2>Dashboard</h2>
       <p>Bienvenido a tu gestor de finanzas personales.</p>
