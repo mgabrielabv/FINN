@@ -5,26 +5,8 @@ import { abrirDB, generarId } from './indexedDB.js';
 export async function mostrarVista(vista) {
   const main = document.getElementById('vista-principal');
   if (vista === 'categorias') {
-    main.innerHTML = '<h2>Categorías</h2><div id="lista-categorias"></div>' +
-      `<form id="form-categoria">
-        <input type="text" id="nombre-categoria" placeholder="Nombre categoría" required>
-        <button type="submit">Agregar</button>
-      </form>`;
+    main.innerHTML = '<h2>Categorías</h2><div id="lista-categorias"></div>';
     await cargarCategorias();
-    const formCat = document.getElementById('form-categoria');
-    formCat.onsubmit = async function(e) {
-      e.preventDefault();
-      const nombre = document.getElementById('nombre-categoria').value.trim();
-      if (!nombre) return;
-      const db = await abrirDB();
-      const tx = db.transaction("categorias", "readwrite");
-      tx.objectStore("categorias").add({ id: generarId(), nombre });
-      tx.oncomplete = async () => {
-        await cargarCategorias();
-        formCat.reset();
-      };
-      tx.onerror = () => alert("Error al guardar la categoría. Intenta de nuevo.");
-    };
   } else if (vista === 'transacciones') {
     main.innerHTML = `
       <h2>Transacciones</h2>
