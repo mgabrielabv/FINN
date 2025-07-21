@@ -1,6 +1,7 @@
 import { cargarCategorias } from './categorias.js';
 import { cargarCategoriasTransaccion, cargarCategoriasFiltro, cargarTransacciones, eliminarTransaccion, editarTransaccion } from './transacciones.js';
 import { abrirDB, generarId } from './indexedDB.js';
+import { renderDashboard } from './dashboard.js';
  
 export async function mostrarVista(vista) {
   const main = document.getElementById('vista-principal');
@@ -60,9 +61,9 @@ export async function mostrarVista(vista) {
     document.getElementById('buscar-transaccion').oninput = () => cargarTransacciones();
     document.getElementById('filtrar-tipo').onchange = () => cargarTransacciones();
     document.getElementById('filtrar-categoria').onchange = () => cargarTransacciones();
+  } else if (vista === 'dashboard') {
+    renderDashboard();
   } else {
-    main.innerHTML = `<h2>Dashboard</h2>
-      <p>Bienvenido a tu gestor de finanzas personales.</p>
-      <p>Usa el menú para navegar entre categorías y transacciones.</p>`;
+    main.innerHTML = '';
   }
 }

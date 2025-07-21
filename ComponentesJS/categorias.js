@@ -69,19 +69,20 @@ export async function cargarCategorias() {
     form.style.alignItems = 'center';
     form.style.justifyContent = 'center';
     form.style.gap = '16px';
-    form.style.margin = '36px auto 0 auto';
-    form.style.width = '100%';
+    form.style.margin = '28px auto 0 auto';
+    form.style.width = 'auto';
+    form.style.maxWidth = '380px';
     form.innerHTML = `
-      <div style="display:flex; flex-direction:row; gap:18px; justify-content:center; width:100%; max-width:600px;">
-        <input type="text" id="nombre-categoria-input" placeholder="Nueva categoría" required style="flex:1; min-width:160px; padding:0.7em 1em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:1em; display:none; background:#F9F9F9; color:#1C1C1C;">
-        <select id="select-cat-accion" style="display:none; min-width:120px; padding:0.5em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:1em; background:#F9F9F9; color:#1C1C1C;"></select>
-        <input type="text" id="nuevo-nombre-cat" placeholder="Nuevo nombre" style="display:none; min-width:120px; padding:0.5em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:1em; background:#F9F9F9; color:#1C1C1C;">
-        <button type="button" id="btn-confirmar-eliminar" style="display:none; background:#D7263D; color:#fff; border:1.5px solid #D7263D; border-radius:8px; padding:0.7em 1.2em; font-size:1em; font-weight:600; margin-left:8px; transition:background 0.2s, color 0.2s, border-color 0.2s;">Confirmar eliminación</button>
+      <div style="display:flex; flex-direction:row; gap:14px; justify-content:center; width:100%; max-width:380px;">
+        <input type="text" id="nombre-categoria-input" placeholder="Nueva categoría" required style="flex:1; min-width:120px; padding:0.6em 0.8em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; display:none; background:#F9F9F9; color:#1C1C1C;">
+        <select id="select-cat-accion" style="display:none; min-width:90px; padding:0.4em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; background:#F9F9F9; color:#1C1C1C;"></select>
+        <input type="text" id="nuevo-nombre-cat" placeholder="Nuevo nombre" style="display:none; min-width:90px; padding:0.4em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; background:#F9F9F9; color:#1C1C1C;">
+        <button type="button" id="btn-confirmar-eliminar" style="display:none; background:#D7263D; color:#fff; border:1.5px solid #D7263D; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; margin-left:6px; transition:background 0.2s, color 0.2s, border-color 0.2s;">Confirmar eliminación</button>
       </div>
-      <div style="display:flex; flex-direction:row; gap:18px; justify-content:center; width:100%; max-width:600px;">
-        <button type="button" id="btn-agregar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.7em 1.2em; font-size:1em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Agregar</button>
-        <button type="button" id="btn-editar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.7em 1.2em; font-size:1em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Editar</button>
-        <button type="button" id="btn-eliminar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.7em 1.2em; font-size:1em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Eliminar</button>
+      <div style="display:flex; flex-direction:row; gap:14px; justify-content:center; width:100%; max-width:380px; margin-top:10px;">
+        <button type="button" id="btn-agregar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Agregar</button>
+        <button type="button" id="btn-editar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Editar</button>
+        <button type="button" id="btn-eliminar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Eliminar</button>
       </div>
     `;
     // Insertar el formulario después del carrusel (lista)
@@ -227,10 +228,10 @@ export async function cargarCategorias() {
     lista.style.overflowX = 'auto';
     lista.style.gap = '32px';
     lista.style.padding = '32px 0 32px 24px';
-    lista.style.margin = '0';
+    lista.style.margin = '0 auto';
     lista.style.scrollSnapType = 'x mandatory';
     lista.style.webkitOverflowScrolling = 'touch';
-    lista.style.maxWidth = '100vw';
+    lista.style.maxWidth = '700px';
     lista.style.boxSizing = 'border-box';
 
     categorias.forEach(cat => {
