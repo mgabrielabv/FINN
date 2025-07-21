@@ -1,3 +1,4 @@
+import { abrirDB } from './indexedDB.js';
 
 export async function cargarCategoriasTransaccion() {
   const db = await abrirDB();
@@ -12,8 +13,7 @@ export async function cargarCategoriasTransaccion() {
       select.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
     });
   };
-}
-import { abrirDB } from './indexedDB.js';
+ }
 
 const CATEGORIAS_PREDEFINIDAS = [
   'Alimentación', 'Transporte', 'Ocio', 'Servicios', 'Salud', 'Educación', 'Otros'
@@ -35,6 +35,20 @@ export async function cargarCategorias() {
   const req = store.getAll();
   req.onsuccess = async function() {
     let categorias = req.result;
+
+    // NUEVO: Insertar predefinidas si faltan (sin duplicar)
+    const nombresExistentes = categorias.map(c => c.nombre);
+    let faltan = CATEGORIAS_PREDEFINIDAS.filter(nombre => !nombresExistentes.includes(nombre));
+    if (faltan.length > 0) {
+      const txAdd = db.transaction("categorias", "readwrite");
+      const storeAdd = txAdd.objectStore("categorias");
+      faltan.forEach(nombre => {
+        storeAdd.add({ id: Date.now().toString() + Math.random().toString(36).substr(2, 5), nombre });
+      });
+      txAdd.oncomplete = cargarCategorias;
+      return;
+    }
+
     categorias.sort((a, b) => {
       const aNum = parseInt(a.id);
       const bNum = parseInt(b.id);
@@ -52,13 +66,14 @@ export async function cargarCategorias() {
       txAdd.oncomplete = cargarCategorias;
       return;
     }
-    const lista = document.getElementById('lista-categorias');
-    if (!lista) {
-      console.error('No se encontró el elemento con id lista-categorias');
-      alert('Error: No se encontró el contenedor de categorías (id=lista-categorias)');
-      return;
-    }
 
+    // Limpiar el main y renderizar el contenedor de categorías y el formulario
+    const main = document.getElementById('vista-principal');
+    main.innerHTML = `
+      <h2>Categorías</h2>
+      <div id="lista-categorias"></div>
+    `;
+    const lista = document.getElementById('lista-categorias');
 
     document.querySelectorAll('form#form-categoria-global').forEach(f => f.remove());
     // Crear el formulario de categorías
@@ -84,8 +99,9 @@ export async function cargarCategorias() {
         <button type="button" id="btn-eliminar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.7em 1.2em; font-size:1em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Eliminar</button>
       </div>
     `;
-    // Insertar el formulario después del carrusel (lista)
-    lista.parentNode.insertBefore(form, lista.nextSibling);
+    // Insertar el formulario antes de la lista
+    main.insertBefore(form, lista);
+
     Array.from(form.querySelectorAll('.btn-categoria')).forEach(btn => {
       btn.onmouseover = () => {
         btn.style.background = '#D4B483';
@@ -221,6 +237,7 @@ export async function cargarCategorias() {
     }
 
 
+    // Renderizar la lista de categorías
     lista.innerHTML = '';
     lista.style.display = 'flex';
     lista.style.flexDirection = 'row';
