@@ -10,7 +10,7 @@ export function renderDashboard() {
   dashboard.style.alignItems = 'center';
   dashboard.style.gap = '20px';
   dashboard.style.width = '100%';
-  dashboard.style.maxWidth = '1800px';
+  dashboard.style.maxWidth = '1500px';
   dashboard.style.margin = '650px auto 0 auto';
   dashboard.style.fontFamily = 'Arial, sans-serif';
   dashboard.style.minHeight = 'auto';
@@ -21,8 +21,9 @@ export function renderDashboard() {
   titulo.textContent = 'DASHBOARD';
   titulo.style.textAlign = 'center';
   titulo.style.color = '#fff';
-  titulo.style.margin = '0 0 10px 0';
-  titulo.style.fontSize = '2.2rem';
+  titulo.style.margin = '0 0 4px 0';
+  titulo.style.fontSize = '1.3rem';
+  titulo.style.lineHeight = '1.1';
   dashboard.appendChild(titulo);
 
   const filtros = document.createElement('div');

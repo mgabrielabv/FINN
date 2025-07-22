@@ -58,6 +58,7 @@ export async function cargarCategorias() {
       alert('Error: No se encontró el contenedor de categorías (id=lista-categorias)');
       return;
     }
+    // ...layout original, sin contenedor extra ni título adicional...
 
 
     document.querySelectorAll('form#form-categoria-global').forEach(f => f.remove());
@@ -233,6 +234,9 @@ export async function cargarCategorias() {
     lista.style.webkitOverflowScrolling = 'touch';
     lista.style.maxWidth = '700px';
     lista.style.boxSizing = 'border-box';
+    lista.style.background = '#2c2f33';
+    lista.style.borderRadius = '12px';
+    lista.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
 
     categorias.forEach(cat => {
       const div = document.createElement('div');
