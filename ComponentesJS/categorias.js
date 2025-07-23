@@ -1,5 +1,5 @@
 import { abrirDB } from './indexedDB.js';
-// Quitar import, usar window.alertaMensaje y window.alertaConfirmacion
+
 
 export async function cargarCategoriasTransaccion() {
   const db = await abrirDB();
@@ -260,6 +260,13 @@ export async function cargarCategorias() {
     lista.style.background = '#2c2f33';
     lista.style.borderRadius = '12px';
     lista.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+
+    // Ordenar: "Otros" siempre al final
+    categorias.sort((a, b) => {
+      if (a.nombre === "Otros") return 1;
+      if (b.nombre === "Otros") return -1;
+      return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+    });
 
     categorias.forEach(cat => {
       const div = document.createElement('div');
