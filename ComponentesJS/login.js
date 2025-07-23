@@ -1,22 +1,34 @@
-window.addEventListener('DOMContentLoaded', () => {
+// Quitar import, usar window.alertaMensaje y window.alertaUsuarioExistente
+document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     document.body.classList.add('loaded');
   }, 1200);
 
   // Mostrar solo login al inicio, sin clase extra
-  document.querySelector('.topbar').style.display = 'none';
-  document.getElementById('vista-principal').style.display = 'none';
-  document.querySelector('.logo').style.display = '';
-  document.querySelector('.btn-iniciar').style.display = 'block';
-  document.getElementById('loginForm').style.display = 'none';
 
-  document.querySelector('.btn-iniciar').addEventListener('click', () => {
-    document.querySelector('.logo').style.display = 'none';
-    document.querySelector('.btn-iniciar').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'flex';
-  });
+  // Estado inicial seguro
+
 
   const loginForm = document.getElementById('loginForm');
+  const topbar = document.querySelector('.topbar');
+  const main = document.getElementById('vista-principal');
+  const logo = document.querySelector('.logo');
+  const btnIniciar = document.querySelector('.btn-iniciar');
+  if (topbar) topbar.style.display = 'none';
+  if (main) main.style.display = 'none';
+  if (logo) logo.style.display = '';
+  if (btnIniciar) btnIniciar.style.display = 'block';
+  if (loginForm) loginForm.style.display = 'none';
+
+  if (btnIniciar) {
+    btnIniciar.addEventListener('click', () => {
+      if (logo) logo.style.display = 'none';
+      btnIniciar.style.display = 'none';
+      if (loginForm) loginForm.style.display = 'flex';
+    });
+  }
+
+  // Eliminada declaración duplicada de loginForm
   const formTitle = document.getElementById('form-title');
   const formBtn = document.getElementById('form-btn');
   const showRegister = document.getElementById('showRegister');
@@ -39,15 +51,20 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  loginForm.addEventListener('submit', function(e) {
+loginForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const usuario = this.querySelector('input[type="text"]').value.trim();
     const contrasena = this.querySelector('input[type="password"]').value.trim();
 
     if (modoRegistro) {
+      const guardadoUsuario = (localStorage.getItem('usuario') || '').trim();
+      if (guardadoUsuario) {
+        window.alertaUsuarioExistente();
+        return;
+      }
       localStorage.setItem('usuario', usuario);
       localStorage.setItem('contrasena', contrasena);
-      alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+        await window.alertaMensaje('¡Registro exitoso! Ahora puedes iniciar sesión.');
       modoRegistro = false;
       formTitle.textContent = 'Iniciar sesión';
       formBtn.textContent = 'Entrar';
@@ -76,7 +93,7 @@ window.addEventListener('DOMContentLoaded', () => {
           if (window.asignarNavDelegation) window.asignarNavDelegation();
         }
       } else {
-        alert('Usuario o contraseña incorrectos.');
+        await window.alertaMensaje('Usuario o contraseña incorrectos.');
       }
     }
   });

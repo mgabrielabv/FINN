@@ -1,4 +1,3 @@
-// filepath: /Users/luismi/Documents/Uru/6to_trimestre/LCW/FINN/ComponentesJS/app.js
 import { mostrarVista as mostrarVistaNavbar } from './navbar.js';
 import { cargarCategorias } from './categorias.js';
 import { cargarCategoriasTransaccion, cargarTransacciones } from './transacciones.js';
@@ -14,6 +13,9 @@ async function navDelegationHandler(e) {
   } else if (e.target && e.target.id === 'nav-transacciones' && vistaActual !== 'transacciones') {
     vistaActual = 'transacciones';
     await mostrarVista('transacciones');
+  } else if (e.target && e.target.id === 'nav-presupuesto' && vistaActual !== 'presupuesto') {
+    vistaActual = 'presupuesto';
+    await mostrarVista('presupuesto');
   } else if (e.target && e.target.id === 'nav-dashboard' && vistaActual !== 'dashboard') {
     vistaActual = 'dashboard';
     await mostrarVista('dashboard');

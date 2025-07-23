@@ -1,3 +1,5 @@
+import { abrirDB } from './indexedDB.js';
+// Quitar import, usar window.alertaMensaje y window.alertaConfirmacion
 
 export async function cargarCategoriasTransaccion() {
   const db = await abrirDB();
@@ -12,11 +14,16 @@ export async function cargarCategoriasTransaccion() {
       select.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
     });
   };
-}
-import { abrirDB } from './indexedDB.js';
+ }
 
 const CATEGORIAS_PREDEFINIDAS = [
-  'Alimentación', 'Transporte', 'Ocio', 'Servicios', 'Salud', 'Educación', 'Otros'
+  'Alimentación',
+  'Transporte',
+  'Ocio',
+  'Servicios',
+  'Salud',
+  'Educación',
+  'Otros'
 ];
 const ICONOS_CATEGORIAS = {
   'Alimentación': 'fa-utensils',
@@ -35,6 +42,20 @@ export async function cargarCategorias() {
   const req = store.getAll();
   req.onsuccess = async function() {
     let categorias = req.result;
+
+    // NUEVO: Insertar predefinidas si faltan (sin duplicar)
+    const nombresExistentes = categorias.map(c => c.nombre);
+    let faltan = CATEGORIAS_PREDEFINIDAS.filter(nombre => !nombresExistentes.includes(nombre));
+    if (faltan.length > 0) {
+      const txAdd = db.transaction("categorias", "readwrite");
+      const storeAdd = txAdd.objectStore("categorias");
+      faltan.forEach(nombre => {
+        storeAdd.add({ id: Date.now().toString() + Math.random().toString(36).substr(2, 5), nombre });
+      });
+      txAdd.oncomplete = cargarCategorias;
+      return;
+    }
+
     categorias.sort((a, b) => {
       const aNum = parseInt(a.id);
       const bNum = parseInt(b.id);
@@ -52,42 +73,43 @@ export async function cargarCategorias() {
       txAdd.oncomplete = cargarCategorias;
       return;
     }
+
+    // Limpiar el main y renderizar el contenedor de categorías y el formulario
+    const main = document.getElementById('vista-principal');
+    main.innerHTML = `
+      <h2>Categorías</h2>
+      <div id="lista-categorias"></div>
+    `;
     const lista = document.getElementById('lista-categorias');
     if (!lista) {
       console.error('No se encontró el elemento con id lista-categorias');
-      alert('Error: No se encontró el contenedor de categorías (id=lista-categorias)');
+            await window.alertaMensaje('Error: No se encontró el contenedor de categorías (id=lista-categorias)');
       return;
     }
     // ...layout original, sin contenedor extra ni título adicional...
 
 
     document.querySelectorAll('form#form-categoria-global').forEach(f => f.remove());
-    // Crear el formulario de categorías
+    // Crear el formulario de categorías con los botones juntos
     let form = document.createElement('form');
     form.id = 'form-categoria-global';
-    form.style.display = 'flex';
-    form.style.flexDirection = 'column';
-    form.style.alignItems = 'center';
-    form.style.justifyContent = 'center';
-    form.style.gap = '16px';
-    form.style.margin = '28px auto 0 auto';
-    form.style.width = 'auto';
-    form.style.maxWidth = '380px';
+    form.className = 'form-categoria-global';
     form.innerHTML = `
-      <div style="display:flex; flex-direction:row; gap:14px; justify-content:center; width:100%; max-width:380px;">
-        <input type="text" id="nombre-categoria-input" placeholder="Nueva categoría" required style="flex:1; min-width:120px; padding:0.6em 0.8em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; display:none; background:#F9F9F9; color:#1C1C1C;">
-        <select id="select-cat-accion" style="display:none; min-width:90px; padding:0.4em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; background:#F9F9F9; color:#1C1C1C;"></select>
-        <input type="text" id="nuevo-nombre-cat" placeholder="Nuevo nombre" style="display:none; min-width:90px; padding:0.4em; border-radius:8px; border:1.5px solid #6E6E6E; font-size:0.98em; background:#F9F9F9; color:#1C1C1C;">
-        <button type="button" id="btn-confirmar-eliminar" style="display:none; background:#D7263D; color:#fff; border:1.5px solid #D7263D; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; margin-left:6px; transition:background 0.2s, color 0.2s, border-color 0.2s;">Confirmar eliminación</button>
+      <div class="categoria-form-row">
+        <input type="text" id="nombre-categoria-input" placeholder="Nueva categoría" required class="input-categoria" style="display:none;">
+        <select id="select-cat-accion" class="select-categoria" style="display:none;"></select>
+        <input type="text" id="nuevo-nombre-cat" placeholder="Nuevo nombre" class="input-categoria" style="display:none;">
+        <button type="button" id="btn-confirmar-eliminar" class="btn-confirmar-eliminar" style="display:none;">Confirmar eliminación</button>
       </div>
-      <div style="display:flex; flex-direction:row; gap:14px; justify-content:center; width:100%; max-width:380px; margin-top:10px;">
-        <button type="button" id="btn-agregar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Agregar</button>
-        <button type="button" id="btn-editar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Editar</button>
-        <button type="button" id="btn-eliminar-cat" class="btn-categoria" style="background:#1E3D59; color:#F9F9F9; border:1.5px solid #1E3D59; border-radius:8px; padding:0.6em 1em; font-size:0.98em; font-weight:600; transition:background 0.2s, color 0.2s, border-color 0.2s;">Eliminar</button>
+      <div class="categoria-form-row categoria-form-row-botones">
+        <button type="button" id="btn-agregar-cat" class="btn-categoria">Agregar</button>
+        <button type="button" id="btn-editar-cat" class="btn-categoria">Editar</button>
+        <button type="button" id="btn-eliminar-cat" class="btn-categoria">Eliminar</button>
       </div>
     `;
-    // Insertar el formulario después del carrusel (lista)
-    lista.parentNode.insertBefore(form, lista.nextSibling);
+
+    main.insertBefore(form, lista.nextSibling);
+
     Array.from(form.querySelectorAll('.btn-categoria')).forEach(btn => {
       btn.onmouseover = () => {
         btn.style.background = '#D4B483';
@@ -155,7 +177,7 @@ export async function cargarCategorias() {
       btnConfirmarEliminar.onclick = async function() {
         const id = selectAccion.value;
         if (!id) return;
-        if (!confirm('¿Eliminar la categoría seleccionada?')) return;
+            if (!(await window.alertaConfirmacion('¿Eliminar la categoría seleccionada?'))) return;
         const db2 = await abrirDB();
         const tx2 = db2.transaction("categorias", "readwrite");
         tx2.objectStore("categorias").delete(id);
@@ -223,6 +245,7 @@ export async function cargarCategorias() {
     }
 
 
+    // Renderizar la lista de categorías
     lista.innerHTML = '';
     lista.style.display = 'flex';
     lista.style.flexDirection = 'row';

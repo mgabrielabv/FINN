@@ -5,40 +5,18 @@ export function renderDashboard() {
 
   const dashboard = document.createElement('div');
   dashboard.id = 'dashboard';
-  dashboard.style.display = 'flex';
-  dashboard.style.flexDirection = 'column';
-  dashboard.style.alignItems = 'center';
-  dashboard.style.gap = '20px';
-  dashboard.style.width = '100%';
-  dashboard.style.maxWidth = '1500px';
-  dashboard.style.margin = '650px auto 0 auto';
-  dashboard.style.fontFamily = 'Arial, sans-serif';
-  dashboard.style.minHeight = 'auto';
-  dashboard.style.boxSizing = 'border-box';
-  dashboard.style.overflow = 'visible';
+  dashboard.className = 'dashboard-container';
 
   const titulo = document.createElement('h1');
   titulo.textContent = 'DASHBOARD';
-  titulo.style.textAlign = 'center';
-  titulo.style.color = '#fff';
-  titulo.style.margin = '0 0 4px 0';
-  titulo.style.fontSize = '1.3rem';
-  titulo.style.lineHeight = '1.1';
+  titulo.className = 'dashboard-title';
   dashboard.appendChild(titulo);
 
   const filtros = document.createElement('div');
-  filtros.style.display = 'flex';
-  filtros.style.justifyContent = 'center';
-  filtros.style.gap = '15px';
-  filtros.style.marginBottom = '10px';
-  filtros.style.flexWrap = 'wrap';
+  filtros.className = 'dashboard-filtros';
   const mesSelect = document.createElement('select')
   mesSelect.id = 'mes-select';
-  mesSelect.style.padding = '8px 12px';
-  mesSelect.style.borderRadius = '4px';
-  mesSelect.style.border = '1px solid #444';
-  mesSelect.style.background = '#2c2f33';
-  mesSelect.style.color = '#fff';
+  mesSelect.className = 'dashboard-select';
   const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   meses.forEach((mes, i) => {
     const option = document.createElement('option');
@@ -49,11 +27,7 @@ export function renderDashboard() {
   });
   const anioSelect = document.createElement('select');
   anioSelect.id = 'anio-select';
-  anioSelect.style.padding = '8px 12px';
-  anioSelect.style.borderRadius = '4px';
-  anioSelect.style.border = '1px solid #444';
-  anioSelect.style.background = '#2c2f33';
-  anioSelect.style.color = '#fff';
+  anioSelect.className = 'dashboard-select';
   const currentYear = new Date().getFullYear();
   for (let i = currentYear - 2; i <= currentYear + 2; i++) {
     const option = document.createElement('option');
@@ -67,12 +41,6 @@ export function renderDashboard() {
   dashboard.appendChild(filtros);
 
   const kpis = document.createElement('div');
-  kpis.style.display = 'flex';
-  kpis.style.flexDirection = 'row';
-  kpis.style.justifyContent = 'center';
-  kpis.style.alignItems = 'stretch';
-  kpis.style.gap = '18px';
-  kpis.style.marginBottom = '15px';
   const kpiData = [
     { id: 'ingresos', title: 'INGRESOS', color: '#4CAF50' },
     { id: 'gastos', title: 'GASTOS', color: '#F44336' },
@@ -82,27 +50,19 @@ export function renderDashboard() {
   kpiData.forEach(kpi => {
     const card = document.createElement('div');
     card.id = `${kpi.id}-kpi`;
-    card.style.background = '#2c2f33';
-    card.style.padding = '12px';
-    card.style.borderRadius = '8px';
-    card.style.textAlign = 'center';
-    card.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    card.className = 'kpi-card';
     const title = document.createElement('div');
     title.textContent = kpi.title;
+    title.className = 'kpi-title';
     title.style.color = kpi.color;
-    title.style.fontSize = '0.9rem';
-    title.style.marginBottom = '5px';
-    title.style.fontWeight = 'bold';
     const value = document.createElement('div');
     value.className = 'kpi-valor';
     value.textContent = '0.00 €';
-    value.style.fontSize = '1.2rem';
-    value.style.fontWeight = 'bold';
-    value.style.color = '#fff';
     card.appendChild(title);
     card.appendChild(value);
     kpis.appendChild(card);
   });
+  kpis.className = 'kpi-list';
   dashboard.appendChild(kpis);
 
   const graficosContainer = document.createElement('div');
@@ -243,13 +203,72 @@ export function renderDashboard() {
 
   main.appendChild(dashboard);
 
-  // Espera datos externos generados por el programa
-  if (window.dashboardData) {
-    loadDashboardData(window.dashboardData);
-  } else {
-    console.warn('No se encontraron datos para el dashboard. Asigna window.dashboardData antes de renderizar.');
-    loadDashboardData(); // fallback a datos simulados
-  }
+  import('./presupuesto.js').then(mod => {
+    import('./indexedDB.js').then(dbmod => {
+      mod.getPresupuestoDashboardData().then(presData => {
+        dbmod.abrirDB().then(db => {
+          const txT = db.transaction('transacciones', 'readonly');
+          const storeT = txT.objectStore('transacciones');
+          const reqT = storeT.getAll();
+          reqT.onsuccess = function() {
+            const transacciones = reqT.result;
+            let ingresos = 0, gastos = 0;
+            let transList = [];
+            transacciones.forEach(t => {
+              if (t.tipo === 'Ingreso') ingresos += Number(t.monto);
+              if (t.tipo === 'Egreso') gastos += Number(t.monto);
+              transList.push({ fecha: t.fecha, descripcion: t.descripcion || '', monto: t.monto, tipo: t.tipo === 'Ingreso' ? 'ingreso' : 'gasto', categoriaId: t.categoriaId });
+            });
+            const balance = ingresos - gastos;
+            const txC = db.transaction('categorias', 'readonly');
+            const storeC = txC.objectStore('categorias');
+            const reqC = storeC.getAll();
+            reqC.onsuccess = function() {
+              const categorias = reqC.result;
+              let gastosCategoriaLabels = [];
+              let gastosCategoriaData = [];
+              categorias.forEach(cat => {
+                const suma = transacciones.filter(t => t.tipo === 'Egreso' && t.categoriaId === cat.id).reduce((sum, t) => sum + Number(t.monto), 0);
+                gastosCategoriaLabels.push(cat.nombre);
+                gastosCategoriaData.push(suma);
+              });
+              // Dashboard data
+              const dashboardData = {
+                ingresos,
+                gastos,
+                balance,
+                presupuesto: presData.presupuesto || 0,
+                transacciones: transList.slice(-5).reverse(),
+                gastosCategoria: {
+                  labels: gastosCategoriaLabels,
+                  data: gastosCategoriaData
+                },
+                balanceMensual: {
+                  labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                  real: [],
+                  estimado: []
+                },
+                ingresosComparativo: {
+                  labels: [],
+                  real: [],
+                  estimado: []
+                },
+                evolucionBalance: {
+                  labels: [],
+                  data: []
+                },
+                distribucion: {
+                  labels: ['Ingresos', 'Gastos'],
+                  data: [ingresos, gastos]
+                }
+              };
+              loadDashboardData(dashboardData);
+            };
+          };
+        });
+      });
+    });
+  });
 }
 
 function createFilterControl(labelText, selectElement) {
