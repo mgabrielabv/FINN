@@ -262,6 +262,61 @@ export function renderDashboard() {
                   data: [ingresos, gastos]
                 }
               };
+              // --- Calcular balance mensual (por semana del mes actual) ---
+              const now = new Date();
+              const mesActual = now.getMonth() + 1;
+              const anioActual = now.getFullYear();
+              const semanas = [0, 0, 0, 0];
+              const semanasEstimado = [0, 0, 0, 0];
+
+              transacciones.forEach(t => {
+                const fecha = new Date(t.fecha);
+                if (fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anioActual) {
+                  const semana = Math.floor((fecha.getDate() - 1) / 7);
+                  if (t.tipo === 'Ingreso') semanas[semana] += Number(t.monto);
+                  if (t.tipo === 'Egreso') semanas[semana] -= Number(t.monto);
+                  // Si tienes un estimado, ponlo aquí. Si no, déjalo en 0 o pon un valor fijo.
+                  semanasEstimado[semana] = 0; // O tu lógica de estimado
+                }
+              });
+
+              // --- Calcular ingresos comparativo (real vs estimado por mes) ---
+              const mesesLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+              const realIngresos = Array(12).fill(0);
+              const estimadoIngresos = Array(12).fill(0); // Si tienes un estimado, ponlo aquí
+
+              transacciones.forEach(t => {
+                const fecha = new Date(t.fecha);
+                if (t.tipo === 'Ingreso') realIngresos[fecha.getMonth()] += Number(t.monto);
+                // Si tienes un estimado, ponlo aquí
+              });
+
+              // --- Calcular evolución balance (acumulado por mes) ---
+              const balanceMensual = Array(12).fill(0);
+              transacciones.forEach(t => {
+                const fecha = new Date(t.fecha);
+                if (t.tipo === 'Ingreso') balanceMensual[fecha.getMonth()] += Number(t.monto);
+                if (t.tipo === 'Egreso') balanceMensual[fecha.getMonth()] -= Number(t.monto);
+              });
+              for (let i = 1; i < 12; i++) {
+                balanceMensual[i] += balanceMensual[i - 1];
+              }
+
+              // --- Asignar a dashboardData ---
+              dashboardData.balanceMensual = {
+                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                real: semanas,
+                estimado: semanasEstimado
+              };
+              dashboardData.ingresosComparativo = {
+                labels: mesesLabels,
+                real: realIngresos,
+                estimado: estimadoIngresos
+              };
+              dashboardData.evolucionBalance = {
+                labels: mesesLabels,
+                data: balanceMensual
+              };
               loadDashboardData(dashboardData);
             };
           };
@@ -351,7 +406,7 @@ function loadDashboardData(data) {
     labels: data.gastosCategoria.labels,
     datasets: [{
       data: data.gastosCategoria.data,
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#78f1f1ff', '#f3129dff','#1654a0ff','#9d5162ff','#9966FF'],
       borderWidth: 1
     }]
   });

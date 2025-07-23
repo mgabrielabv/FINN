@@ -5,6 +5,7 @@
   <title>Finanzas Personales</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:700,800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -43,6 +44,11 @@
     </nav>
   </div>
   <main id="vista-principal" style="display:none;"></main>
+  <div id="loader" style="display:none; position:fixed; inset:0; background:rgba(20,24,32,0.85); z-index:2000; align-items:center; justify-content:center;">
+    <div style="color:#fff; font-size:2em; font-family:'Poppins',sans-serif; font-weight:700;">
+      Cargando...
+    </div>
+  </div>
   <script src="ComponentesJS/alerta.js"></script>
   <script src="ComponentesJS/login.js"></script>
 

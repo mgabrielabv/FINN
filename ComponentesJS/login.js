@@ -1,13 +1,7 @@
-// Quitar import, usar window.alertaMensaje y window.alertaUsuarioExistente
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     document.body.classList.add('loaded');
   }, 1200);
-
-  // Mostrar solo login al inicio, sin clase extra
-
-  // Estado inicial seguro
-
 
   const loginForm = document.getElementById('loginForm');
   const topbar = document.querySelector('.topbar');
@@ -27,8 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loginForm) loginForm.style.display = 'flex';
     });
   }
-
-  // Eliminada declaración duplicada de loginForm
   const formTitle = document.getElementById('form-title');
   const formBtn = document.getElementById('form-btn');
   const showRegister = document.getElementById('showRegister');
@@ -75,26 +67,42 @@ loginForm.addEventListener('submit', async function(e) {
       const guardadoUsuario = (localStorage.getItem('usuario') || '').trim();
       const guardadoContrasena = (localStorage.getItem('contrasena') || '').trim();
       if (usuario && contrasena && usuario === guardadoUsuario && contrasena === guardadoContrasena) {
-        document.querySelector('.topbar').style.display = '';
-        document.getElementById('vista-principal').style.display = '';
-        loginForm.style.display = 'none';
-        document.querySelector('.logo').style.display = 'none';
-        document.querySelector('.btn-iniciar').style.display = 'none';
-        if (!window._appLoaded) {
-          const script = document.createElement('script');
-          script.type = 'module';
-          script.src = 'ComponentesJS/app.js';
-          script.onload = () => {
+        mostrarLoader(); 
+
+        setTimeout(() => {
+          document.querySelector('.topbar').style.display = '';
+          document.getElementById('vista-principal').style.display = '';
+          loginForm.style.display = 'none';
+          document.querySelector('.logo').style.display = 'none';
+          document.querySelector('.btn-iniciar').style.display = 'none';
+          ocultarLoader(); 
+          if (!window._appLoaded) {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'ComponentesJS/app.js';
+            script.onload = () => {
+              if (window.asignarNavDelegation) window.asignarNavDelegation();
+            };
+            document.body.appendChild(script);
+            window._appLoaded = true;
+          } else {
             if (window.asignarNavDelegation) window.asignarNavDelegation();
-          };
-          document.body.appendChild(script);
-          window._appLoaded = true;
-        } else {
-          if (window.asignarNavDelegation) window.asignarNavDelegation();
-        }
+          }
+        }, 1200); 
       } else {
         await window.alertaMensaje('Usuario o contraseña incorrectos.');
       }
     }
   });
 });
+
+function mostrarLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.style.display = 'flex';
+}
+function ocultarLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.style.display = 'none';
+}
+window.mostrarLoader = mostrarLoader;
+window.ocultarLoader = ocultarLoader;
